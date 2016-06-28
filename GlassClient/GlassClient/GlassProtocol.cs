@@ -16,6 +16,10 @@ namespace GlassClient
         RequestCurrentDirectory = 0x05,
         SendingCurrentDirectory = 0x06,
         SetCurrentDirectory = 0x07,
-        RequestFileDownload = 0x08
+        RequestFileDownload = 0x08,
+        RequestFileListing = 0x09,
+        SendingFileListing = 0x10,
+        RequestDirectoryListing = 0x11,
+        SendingDirectoryListing = 0x12
     }
 }

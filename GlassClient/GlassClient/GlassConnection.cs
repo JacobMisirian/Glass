@@ -64,6 +64,12 @@ namespace GlassClient
                 case (byte)GlassProtocol.RequestFileDownload:
                     if (!(DownloadFile(Reader.ReadString(), Reader.ReadString()))) return false;
                     break;
+                case (byte)GlassProtocol.RequestDirectoryListing:
+                    if (!(SendDirectoryListing(Reader.ReadString()))) return false;
+                    break;
+                case (byte)GlassProtocol.RequestFileListing:
+                    if (!(SendFileListing(Reader.ReadString()))) return false;
+                    break;
             }
             return true;
         }
@@ -113,6 +119,23 @@ namespace GlassClient
             }
         }
 
+        public bool SendDirectoryListing(string path)
+        {
+            try
+            {
+                if (!(SendProtocol(GlassProtocol.SendingDirectoryListing))) return false;
+                string[] dirs = Directory.GetDirectories(path);
+                if (!(SendInt(dirs.Length))) return false;
+                foreach (string dir in dirs)
+                    if (!(SendString(dir))) return false;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public bool SendFile(string filePath)
         {
             try
@@ -127,6 +150,23 @@ namespace GlassClient
                         return false;
                     }
                 file.Close();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public bool SendFileListing(string path)
+        {
+            try
+            {
+                if (!(SendProtocol(GlassProtocol.SendingFileListing))) return false;
+                string[] dirs = Directory.GetFiles(path);
+                if (!(SendInt(dirs.Length))) return false;
+                foreach (string dir in dirs)
+                    if (!(SendString(dir))) return false;
                 return true;
             }
             catch
