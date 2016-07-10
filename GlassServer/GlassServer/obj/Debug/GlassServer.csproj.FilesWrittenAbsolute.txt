@@ -1,0 +1,5 @@
+/home/reagan/Glass/GlassServer/GlassServer/obj/Debug/.NETFramework,Version=v4.5.AssemblyAttribute.cs
+/home/reagan/Glass/GlassServer/GlassServer/bin/Debug/GlassServer.exe.mdb
+/home/reagan/Glass/GlassServer/GlassServer/bin/Debug/GlassServer.exe
+/home/reagan/Glass/GlassServer/GlassServer/obj/Debug/GlassServer.exe
+/home/reagan/Glass/GlassServer/GlassServer/obj/Debug/GlassServer.exe.mdb

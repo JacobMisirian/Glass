@@ -6,3 +6,10 @@
 /home/jacob/Glass/GlassClient/GlassClient/bin/Debug/GlassClient.exe.mdb
 /home/jacob/Glass/GlassClient/GlassClient/bin/Debug/GlassClient.exe
 /home/jacob/Glass/GlassClient/GlassClient/obj/Debug/GlassClient.exe.mdb
+/home/reagan/Glass/GlassClient/GlassClient/obj/Debug/.NETFramework,Version=v4.0.AssemblyAttribute.cs
+/home/reagan/Glass/GlassClient/GlassClient/obj/Debug/GlassClient.Properties.Resources.resources
+/home/reagan/Glass/GlassClient/GlassClient/bin/Debug/GlassClient.exe.config
+/home/reagan/Glass/GlassClient/GlassClient/bin/Debug/GlassClient.exe.mdb
+/home/reagan/Glass/GlassClient/GlassClient/bin/Debug/GlassClient.exe
+/home/reagan/Glass/GlassClient/GlassClient/obj/Debug/GlassClient.exe
+/home/reagan/Glass/GlassClient/GlassClient/obj/Debug/GlassClient.exe.mdb

