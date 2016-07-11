@@ -17,7 +17,7 @@ namespace GlassServer
         public string UserName { get; set; }
         public string IP { get; set; }
         public string CurrentDirectory { get; set; }
-        public string Identity { get { return string.Format("{0}{1}", UserName, IP); } }
+        public int Identity { get; set; }
 
         public Client(TcpClient client)
         {
@@ -59,6 +59,11 @@ namespace GlassServer
         public void WriteLine(GlassProtocol proto)
         {
             Writer.Write((byte)proto);
+            Writer.Flush();
+        }
+        public void WriteLine(long num)
+        {
+            Writer.Write(num);
             Writer.Flush();
         }
         public void WriteLine(string text)

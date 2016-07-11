@@ -18,7 +18,12 @@ namespace GlassClient
             {
                 GlassConnection connection = new GlassConnection();
                 while (!connection.Connect("127.0.0.1", 1337)) Thread.Sleep(5000);
-                while (connection.Listen()) ;
+                while (true)
+                {
+                    if (!connection.Listen())
+                    if (!(connection.SendError("Failed!")))
+                        break;
+                }
             }
         }
     }

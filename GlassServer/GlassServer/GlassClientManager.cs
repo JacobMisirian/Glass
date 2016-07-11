@@ -92,6 +92,9 @@ namespace GlassServer
                             dirs[i] = client.ReadString();
                         OnDirectoryListingRecieved(new DirectoryListingRecievedEventArgs { Client = client, Directories = dirs });
                         break;
+                    case (byte)GlassProtocol.SendingError:
+                        Console.WriteLine("ERROR! {0}", client.ReadString());
+                        break;
                     case (byte)GlassProtocol.SendingFile:
                         ReadInput = false;
                         OnFileRecieved(new FileRecievedEventArgs { Client = client, Length = client.ReadLong(), BinaryReader = client.Reader });

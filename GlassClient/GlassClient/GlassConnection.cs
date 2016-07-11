@@ -91,7 +91,7 @@ namespace GlassClient
         {
             try
             {
-                StreamWriter file = new StreamWriter(path);
+                BinaryWriter file = new BinaryWriter(new StreamWriter(path).BaseStream);
                 long length = Reader.ReadInt64();
                 for (long i = 0; i < length; i++)
                     file.Write(Reader.ReadByte());
@@ -136,15 +136,23 @@ namespace GlassClient
             }
         }
 
+        public bool SendError(string msg)
+        {
+            if (!(SendProtocol(GlassProtocol.SendingError))) return false;
+            if (!(SendString(msg))) return false;
+
+            return true;
+        }
+
         public bool SendFile(string filePath)
         {
             try
             {
                 if (!(SendProtocol(GlassProtocol.SendingFile))) return false;
                 if (!SendLong(new FileInfo(filePath).Length)) return false;
-                StreamReader file = new StreamReader(filePath);
+                BinaryReader file = new BinaryReader(new StreamReader(filePath).BaseStream);
                 while (file.BaseStream.Position < file.BaseStream.Length)
-                    if (!SendByte((byte)file.Read()))
+                    if (!SendByte(file.ReadByte()))
                     {
                         file.Close();
                         return false;

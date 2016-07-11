@@ -1,6 +1,26 @@
 ﻿<Properties StartupItem="GlassServer/GlassServer.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench />
+  <MonoDevelop.Ide.Workbench ActiveDocument="GlassServer/GlassUI.cs">
+    <Files>
+      <File FileName="GlassServer/Program.cs" Line="12" Column="52" />
+      <File FileName="GlassServer/GlassProtocol.cs" Line="15" Column="35" />
+      <File FileName="GlassServer/GlassListener.cs" Line="4" Column="26" />
+      <File FileName="GlassServer/GlassUI.cs" Line="113" Column="64" />
+      <File FileName="GlassServer/GlassClientManager.cs" Line="109" Column="18" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="GlassServer" expanded="True">
+            <Node name="GlassServer" expanded="True">
+              <Node name="Events" expanded="True" />
+              <Node name="GlassUI.cs" selected="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>

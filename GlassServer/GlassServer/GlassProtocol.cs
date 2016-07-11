@@ -14,9 +14,10 @@ namespace GlassServer
         SetCurrentDirectory = 0x07,
         RequestFileDownload = 0x08,
         RequestFileListing = 0x09,
-        SendingFileListing = 0x10,
-        RequestDirectoryListing = 0x11,
-        SendingDirectoryListing = 0x12
+        SendingFileListing = 0x0A,
+        RequestDirectoryListing = 0x0B,
+        SendingDirectoryListing = 0x0C,
+        SendingError = 0x0D
     }
 }
 

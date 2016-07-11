@@ -11,7 +11,7 @@ namespace GlassServer
         public GlassListener GlassListener { get; private set; }
         public GlassClientManager GlassClientManager { get; private set; }
 
-        public Dictionary<string, Client> IdentifiedClients = new Dictionary<string, Client>();
+        public Dictionary<int, Client> IdentifiedClients = new Dictionary<int, Client>();
 
         public GlassUI(string ip, int port)
         {
@@ -31,32 +31,67 @@ namespace GlassServer
         {
             GlassListener.ListenForConnections();
             Client selectedClient = null;
+            int selectedClientID = 0;
             while (true)
             {
                 string command = Console.ReadLine();
                 string[] parts = command.Split(' ');
+                string remainder = null;
+                if (parts.Length >= 2)
+                    remainder = command.Substring(command.IndexOf(" ") + 1);
                 switch (parts[0].ToLower())
                 {
                     case "select":
-                        selectedClient = IdentifiedClients[parts[1]];
+                        try
+                        {
+                            int id = Convert.ToInt32(parts[1]);
+                            selectedClient = IdentifiedClients[id];
+                            selectedClientID = id;
+                        }
+                        catch
+                        {
+                            Console.WriteLine("Was not a number!");
+                        }
+                        break;
+                    case "selected":
+                        Console.WriteLine("{0}:\t{1} {2}", selectedClientID, selectedClient.UserName, selectedClient.IP);
+                        break;
+                    case "list":
+                        foreach (var pair in IdentifiedClients)
+                            Console.WriteLine("{0}:\t{1} {2}", pair.Key, pair.Value.UserName, pair.Value.IP);
                         break;
                     case "pwd":
                         selectedClient.WriteLine(GlassProtocol.RequestCurrentDirectory);
                         break;
                     case "ls":
                         selectedClient.WriteLine(GlassProtocol.RequestDirectoryListing);
-                        selectedClient.WriteLine(parts.Length < 2 ? selectedClient.CurrentDirectory : parts[1]);
+                        selectedClient.WriteLine(parts.Length < 2 ? selectedClient.CurrentDirectory : remainder);
                         selectedClient.WriteLine(GlassProtocol.RequestFileListing);
-                        selectedClient.WriteLine(parts.Length < 2 ? selectedClient.CurrentDirectory : parts[1]);
+                        selectedClient.WriteLine(parts.Length < 2 ? selectedClient.CurrentDirectory : remainder);
                         break;
                     case "dl":
                         selectedClient.WriteLine(GlassProtocol.RequestFileDownload);
                         selectedClient.WriteLine(parts[1]);
                         selectedClient.WriteLine(parts[2]);
                         break;
+                    case "cd":
+                        selectedClient.WriteLine(GlassProtocol.SetCurrentDirectory);
+                        selectedClient.WriteLine(remainder);
+                        selectedClient.CurrentDirectory = remainder;
+                        break;
                     case "get":
                         selectedClient.WriteLine(GlassProtocol.RequestFile);
-                        selectedClient.WriteLine(parts[1]);
+                        selectedClient.WriteLine(remainder);
+                        break;
+                    case "put":
+                        selectedClient.WriteLine(GlassProtocol.SendingFile);
+                        selectedClient.WriteLine(parts[2]);
+                        selectedClient.WriteLine(new FileInfo(parts[1]).Length);
+                        BinaryReader file = new BinaryReader(new StreamReader(parts[1]).BaseStream);
+                        while (file.BaseStream.Position < file.BaseStream.Length)
+                            selectedClient.Writer.Write(file.ReadByte());
+                        file.Close();
+                        selectedClient.Writer.Flush();
                         break;
                 }
             }
@@ -68,10 +103,11 @@ namespace GlassServer
             e.Client.WriteLine(GlassProtocol.RequestCurrentDirectory);
         }
 
+        private int id = 0;
         private void manager_IdentifyRecieved(object sender, IdentifyRecievedEventArgs e)
         {
             Console.WriteLine("IDENTIFY {0} from {1}", e.Client.UserName, e.Client.IP);
-            Console.WriteLine("Identity is {0}.", e.Client.Identity);
+            Console.WriteLine("Identity is {0}.", e.Client.Identity = ++id);
             if (IdentifiedClients.ContainsKey(e.Client.Identity))
                 IdentifiedClients.Remove(e.Client.Identity);
             IdentifiedClients.Add(e.Client.Identity, e.Client);
