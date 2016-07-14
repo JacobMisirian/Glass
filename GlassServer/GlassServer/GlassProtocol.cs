@@ -17,7 +17,11 @@ namespace GlassServer
         SendingFileListing = 0x0A,
         RequestDirectoryListing = 0x0B,
         SendingDirectoryListing = 0x0C,
-        SendingError = 0x0D
+        SendingError = 0x0D,
+        RequestDeleteFile = 0x0E,
+        RequestDeleteDir = 0x0F,
+        RequestMessageDisplay = 0x10
+
     }
 }
 

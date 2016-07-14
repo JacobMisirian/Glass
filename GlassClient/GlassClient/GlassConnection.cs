@@ -79,6 +79,14 @@ namespace GlassClient
                     case (byte)GlassProtocol.RequestFileListing:
                         if (!(SendFileListing(Reader.ReadString()))) return false;
                         break;
+                    case (byte)GlassProtocol.RequestDeleteDir:
+                        if (!(DeleteDir(Reader.ReadString()))) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestDeleteFile:
+                        if (!(DeleteFile(Reader.ReadString()))) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestMessageDisplay:
+                        break;
                 }
             }
             catch
@@ -88,17 +96,52 @@ namespace GlassClient
             return true;
         }
 
+        public bool DeleteDir(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                if (!SendError("Directory not found " + path)) return false;
+                return true;
+            }
+            Directory.Delete(path);
+            return true;
+        }
+
+        public bool DeleteFile(string path)
+        {
+            if (!File.Exists(path))
+            {
+                if (!SendError("File not found " + path)) return false;
+                return true;
+            }
+            File.Delete(path);
+            return true;
+        }
+
         public bool DownloadFile(string uri, string path)
         {
             try
             {
                 new WebClient().DownloadFile(uri, path);
-                return true;
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                if (!(SendError("Download failed: " + ex.Message))) return false;
             }
+            return true;
+        }
+
+        public bool DisplayMessage(string msg)
+        {
+            try
+            {
+                MessageBox.Show(msg);
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not display message: " + ex.Message))) return false;
+            }
+            return true;
         }
 
         public bool ReadFile(string path)
@@ -111,12 +154,12 @@ namespace GlassClient
                     file.Write(Reader.ReadByte());
                 file.Flush();
                 file.Close();
-                return true;
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                if (!(SendError("Could not read file: " + ex.Message))) return false;
             }
+            return true;
         }
 
         public bool SendByte(byte b)
@@ -142,12 +185,12 @@ namespace GlassClient
                 if (!(SendInt(dirs.Length))) return false;
                 foreach (string dir in dirs)
                     if (!(SendString(dir))) return false;
-                return true;
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                if (!(SendError("Could not send ls: " + ex.Message))) return false;
             }
+            return true;
         }
 
         public bool SendError(string msg)
@@ -172,12 +215,12 @@ namespace GlassClient
                         return false;
                     }
                 file.Close();
-                return true;
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                if (!(SendError("Could not send file: " + ex.Message))) return false;
             }
+            return true;
         }
 
         public bool SendFileListing(string path)
@@ -189,12 +232,12 @@ namespace GlassClient
                 if (!(SendInt(dirs.Length))) return false;
                 foreach (string dir in dirs)
                     if (!(SendString(dir))) return false;
-                return true;
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                if (!(SendError("Could not send file listing: " + ex.Message))) return false;
             }
+            return true;
         }
 
         public bool SendIdentify()
@@ -210,18 +253,25 @@ namespace GlassClient
 
         public bool SendImageData(Bitmap image)
         {
-            if (!SendProtocol(GlassProtocol.SendingScreen)) return false;
-            if (!SendInt(image.Height)) return false;
-            if (!SendInt(image.Width)) return false;
-            for (int w = 0; w < image.Width; w++)
+            try
             {
-                for (int h = 0; h < image.Height; h++)
+                if (!SendProtocol(GlassProtocol.SendingScreen)) return false;
+                if (!SendInt(image.Height)) return false;
+                if (!SendInt(image.Width)) return false;
+                for (int w = 0; w < image.Width; w++)
                 {
-                    var pixel = image.GetPixel(w, h);
-                    if (!SendByte(pixel.R)) return false;
-                    if (!SendByte(pixel.G)) return false;
-                    if (!SendByte(pixel.B)) return false;
+                    for (int h = 0; h < image.Height; h++)
+                    {
+                        var pixel = image.GetPixel(w, h);
+                        if (!SendByte(pixel.R)) return false;
+                        if (!SendByte(pixel.G)) return false;
+                        if (!SendByte(pixel.B)) return false;
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not send image: " + ex.Message))) return false;
             }
             return true;
         }
@@ -284,10 +334,19 @@ namespace GlassClient
 
         public Bitmap TakeScreenshot()
         {
-            var bmpScreenshot = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height, PixelFormat.Format32bppArgb);
-            var gfxScreenshot = Graphics.FromImage(bmpScreenshot);
-            gfxScreenshot.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, Screen.PrimaryScreen.Bounds.Size, CopyPixelOperation.SourceCopy);
-            return bmpScreenshot;
+            try
+            {
+                var bmpScreenshot = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height, PixelFormat.Format32bppArgb);
+                var gfxScreenshot = Graphics.FromImage(bmpScreenshot);
+                gfxScreenshot.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, Screen.PrimaryScreen.Bounds.Size, CopyPixelOperation.SourceCopy);
+           
+                return bmpScreenshot;
+            }
+            catch (Exception ex)
+            {
+                SendError("Could not take screenshot " + ex.Message);
+            }
+            return new Bitmap(500, 500);
         }
     }
 }

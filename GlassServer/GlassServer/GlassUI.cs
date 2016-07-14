@@ -98,6 +98,18 @@ namespace GlassServer
                         file.Close();
                         selectedClient.Writer.Flush();
                         break;
+                    case "rm":
+                        selectedClient.WriteLine(GlassProtocol.RequestDeleteFile);
+                        selectedClient.WriteLine(remainder);
+                        break;
+                    case "rmf":
+                        selectedClient.WriteLine(GlassProtocol.RequestDeleteDir);
+                        selectedClient.WriteLine(remainder);
+                        break;
+                    case "msg":
+                        selectedClient.WriteLine(GlassProtocol.RequestMessageDisplay);
+                        selectedClient.WriteLine(remainder);
+                        break;
                 }
             }
         }
