@@ -1,0 +1,5 @@
+C:\Users\Reagan\Glass\GlassServer\GlassServer\obj\Debug\GlassServer.exe
+C:\Users\Reagan\Glass\GlassServer\GlassServer\bin\Debug\GlassServer.exe
+C:\Users\Reagan\Glass\GlassServer\GlassServer\bin\Debug\GlassServer.pdb
+C:\Users\Reagan\Glass\GlassServer\GlassServer\obj\Debug\GlassServer.csprojResolveAssemblyReference.cache
+C:\Users\Reagan\Glass\GlassServer\GlassServer\obj\Debug\GlassServer.pdb

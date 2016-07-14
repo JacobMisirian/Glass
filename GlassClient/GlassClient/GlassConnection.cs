@@ -12,7 +12,7 @@ using System.Windows.Forms;
 
 namespace GlassClient
 {
-    public class GlassConnection
+    public class GlassConnection : IDisposable
     {
         public string IP { get; private set; }
         public int Port { get; private set; }
@@ -39,37 +39,51 @@ namespace GlassClient
             }
         }
 
+        public void Dispose()
+        {
+            Client.Close();
+            Reader.Dispose();
+            Writer.Dispose();
+        }
+
         public bool Listen()
         {
-            byte type = Reader.ReadByte();
-
-            switch (type)
+            try
             {
-                case (byte)GlassProtocol.RequestScreen:
-                    if (!(SendImageData(TakeScreenshot()))) return false;
-                    break;
-                case (byte)GlassProtocol.RequestFile:
-                    if (!(SendFile(Reader.ReadString()))) return false;
-                    break;
-                case (byte)GlassProtocol.RequestCurrentDirectory:
-                    if (!(SendProtocol(GlassProtocol.SendingCurrentDirectory))) return false;
-                    if (!(SendString(Directory.GetCurrentDirectory()))) return false;
-                    break;
-                case (byte)GlassProtocol.SetCurrentDirectory:
-                    Directory.SetCurrentDirectory(Reader.ReadString());
-                    break;
-                case (byte)GlassProtocol.SendingFile:
-                    if (!(ReadFile(Reader.ReadString()))) return false;
-                    break;
-                case (byte)GlassProtocol.RequestFileDownload:
-                    if (!(DownloadFile(Reader.ReadString(), Reader.ReadString()))) return false;
-                    break;
-                case (byte)GlassProtocol.RequestDirectoryListing:
-                    if (!(SendDirectoryListing(Reader.ReadString()))) return false;
-                    break;
-                case (byte)GlassProtocol.RequestFileListing:
-                    if (!(SendFileListing(Reader.ReadString()))) return false;
-                    break;
+                byte type = Reader.ReadByte();
+
+                switch (type)
+                {
+                    case (byte)GlassProtocol.RequestScreen:
+                        if (!(SendImageData(TakeScreenshot()))) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestFile:
+                        if (!(SendFile(Reader.ReadString()))) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestCurrentDirectory:
+                        if (!(SendProtocol(GlassProtocol.SendingCurrentDirectory))) return false;
+                        if (!(SendString(Directory.GetCurrentDirectory()))) return false;
+                        break;
+                    case (byte)GlassProtocol.SetCurrentDirectory:
+                        Directory.SetCurrentDirectory(Reader.ReadString());
+                        break;
+                    case (byte)GlassProtocol.SendingFile:
+                        if (!(ReadFile(Reader.ReadString()))) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestFileDownload:
+                        if (!(DownloadFile(Reader.ReadString(), Reader.ReadString()))) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestDirectoryListing:
+                        if (!(SendDirectoryListing(Reader.ReadString()))) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestFileListing:
+                        if (!(SendFileListing(Reader.ReadString()))) return false;
+                        break;
+                }
+            }
+            catch
+            {
+                return false;
             }
             return true;
         }

@@ -56,6 +56,10 @@ namespace GlassServer
                     case "selected":
                         Console.WriteLine("{0}:\t{1} {2}", selectedClientID, selectedClient.UserName, selectedClient.IP);
                         break;
+                    case "info":
+                        var cl = IdentifiedClients[Convert.ToInt32(parts[1])];
+                        Console.WriteLine("{0}:\t{1} {2}", parts[1], cl.UserName, cl.IP);
+                        break;
                     case "list":
                         foreach (var pair in IdentifiedClients)
                             Console.WriteLine("{0}:\t{1} {2}", pair.Key, pair.Value.UserName, pair.Value.IP);
@@ -82,6 +86,7 @@ namespace GlassServer
                     case "get":
                         selectedClient.WriteLine(GlassProtocol.RequestFile);
                         selectedClient.WriteLine(remainder);
+                        selectedClient.FileJobs.Push(remainder);
                         break;
                     case "put":
                         selectedClient.WriteLine(GlassProtocol.SendingFile);
@@ -130,8 +135,8 @@ namespace GlassServer
         }
         private void manager_FileRecieved(object sender, FileRecievedEventArgs e)
         {
-            Console.Write("File recieved {0} bytes. Enter path for saving: ", e.Length);
-            string path = Console.ReadLine();
+            Console.WriteLine("File recieved {0} size {1} bytes.", e.Client.FileJobs.Count > 0 ? e.Client.FileJobs.Peek() : "unknown", e.Length);
+            string path = e.Client.FileJobs.Pop();
             BinaryWriter writer = new BinaryWriter(new StreamWriter(path).BaseStream);
             for (int i = 0; i < e.Length; i++)
                 writer.Write(e.BinaryReader.ReadByte());

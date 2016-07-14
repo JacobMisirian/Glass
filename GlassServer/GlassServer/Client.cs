@@ -19,11 +19,14 @@ namespace GlassServer
         public string CurrentDirectory { get; set; }
         public int Identity { get; set; }
 
+        public Stack<string> FileJobs { get; private set; }
+
         public Client(TcpClient client)
         {
             TcpClient = client;
             Reader = new BinaryReader(client.GetStream());
             Writer = new BinaryWriter(client.GetStream());
+            FileJobs = new Stack<string>();
         }
 
         public byte ReadByte()

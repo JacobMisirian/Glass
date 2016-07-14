@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GlassConnection.cs" />
+    <Compile Include="GlassInstaller.cs" />
     <Compile Include="GlassProtocol.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
