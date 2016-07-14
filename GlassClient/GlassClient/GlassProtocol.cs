@@ -24,6 +24,9 @@ namespace GlassClient
         SendingError =              0x0D,
         RequestDeleteFile =         0x0E,
         RequestDeleteDir =          0x0F,
-        RequestMessageDisplay =     0x10
+        RequestMessageDisplay =     0x10,
+        RequestProgramStart =       0x11,
+        RequestProgramStartStdout = 0x12,
+        SendingProgramStdout =      0x13
     }
 }

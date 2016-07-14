@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -86,12 +87,19 @@ namespace GlassClient
                         if (!(DeleteFile(Reader.ReadString()))) return false;
                         break;
                     case (byte)GlassProtocol.RequestMessageDisplay:
+                        if (!(DisplayMessage(Reader.ReadString()))) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestProgramStart:
+                        if (!(StartProgram(Reader.ReadString(), Reader.ReadString()))) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestProgramStartStdout:
+                        if (!(StartProgramWithStdout(Reader.ReadString(), Reader.ReadString()))) return false;
                         break;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                if (!(SendError("Error encountered: " + ex.Message))) return false;
             }
             return true;
         }
@@ -330,6 +338,44 @@ namespace GlassClient
             {
                 return false;
             }
+        }
+
+        public bool StartProgram(string path, string args)
+        {
+            try
+            {
+                Process proc = new Process();
+                proc.StartInfo = new ProcessStartInfo(path, args);
+                proc.Start();
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Error starting program: " + ex.Message))) return false;
+            }
+            return true;
+        }
+
+        public bool StartProgramWithStdout(string path, string args)
+        {
+            try
+            {
+                Process proc = new Process();
+                ProcessStartInfo info = new ProcessStartInfo(path, args);
+                info.CreateNoWindow = true;
+                info.RedirectStandardOutput = true;
+                info.UseShellExecute = false;
+                proc.Start();
+                while (!proc.StandardOutput.EndOfStream)
+                {
+                    if (!(SendProtocol(GlassProtocol.SendingProgramStdout))) return false;
+                    if (!(SendString(proc.StandardOutput.ReadLine()))) return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Error starting program with stdout: " + ex.Message))) return false;
+            }
+            return true;
         }
 
         public Bitmap TakeScreenshot()
