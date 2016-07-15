@@ -17,6 +17,14 @@ namespace GlassServer
             ReadInput = true;
         }
 
+        public event EventHandler<ClientDisconnectedEventArgs> ClientDisconnected;
+        protected virtual void OnClientDisconnected(ClientDisconnectedEventArgs e)
+        {
+            var handler = ClientDisconnected;
+            if (handler != null)
+                handler(this, e);
+        }
+
         public event EventHandler<CurrentDirectoryRecievedEventArgs> CurrentDirectoryRecieved;
         protected virtual void OnCurrentDirectoryRecieved(CurrentDirectoryRecievedEventArgs e)
         {
@@ -83,51 +91,63 @@ namespace GlassServer
         {
             while (true)
             {
-                if (!ReadInput)
+                try
                 {
-                    Thread.Sleep(50);
-                    continue;
+                    if (!ReadInput)
+                    {
+                        Thread.Sleep(50);
+                        continue;
+                    }
+                    int len;
+                    byte b = client.ReadByte();
+                    switch (b)
+                    {
+                        case (byte)GlassProtocol.Identify:
+                            client.UserName = client.ReadString();
+                            client.IP = client.ReadString();
+                            OnIdentifyRecieved(new IdentifyRecievedEventArgs { Client = client });
+                            break;
+                        case (byte)GlassProtocol.SendingCurrentDirectory:
+                            client.CurrentDirectory = client.ReadString();
+                            OnCurrentDirectoryRecieved(new CurrentDirectoryRecievedEventArgs { Client = client });
+                            break;
+                        case (byte)GlassProtocol.SendingDirectoryListing:
+                            len = client.ReadInt();
+                            string[] dirs = new string[len];
+                            for (int i = 0; i < len; i++)
+                                dirs[i] = client.ReadString();
+                            OnDirectoryListingRecieved(new DirectoryListingRecievedEventArgs { Client = client, Directories = dirs });
+                            break;
+                        case (byte)GlassProtocol.SendingError:
+                            Console.WriteLine("ERROR! {0}", client.ReadString());
+                            break;
+                        case (byte)GlassProtocol.SendingFile:
+                            ReadInput = false;
+                            OnFileRecieved(new FileRecievedEventArgs { Client = client, Length = client.ReadLong(), BinaryReader = client.Reader });
+                            break;
+                        case (byte)GlassProtocol.SendingFileListing:
+                            len = client.ReadInt();
+                            string[] files = new string[len];
+                            for (int i = 0; i < len; i++)
+                                files[i] = client.ReadString();
+                            OnFileListingRecieved(new FileListingRecievedEventArgs { Client = client, Files = files });
+                            break;
+                        case (byte)GlassProtocol.SendingProgramStdout:
+                            OnStdoutReecieved(new StdoutRecievedEventArgs { Line = client.ReadString() });
+                            break;
+                        case (byte)GlassProtocol.SendingProcList:
+                            OnProcListRecieved(new ProcListRecievedEventArgs { ProcList = client.ReadString() });
+                            break;
+                    }
                 }
-                int len;
-                byte b = client.ReadByte();
-                switch (b)
+                catch (System.IO.IOException)
                 {
-                    case (byte)GlassProtocol.Identify:
-                        client.UserName = client.ReadString();
-                        client.IP = client.ReadString();
-                        OnIdentifyRecieved(new IdentifyRecievedEventArgs { Client = client });
-                        break;
-                    case (byte)GlassProtocol.SendingCurrentDirectory:
-                        client.CurrentDirectory = client.ReadString();
-                        OnCurrentDirectoryRecieved(new CurrentDirectoryRecievedEventArgs { Client = client });
-                        break;
-                    case (byte)GlassProtocol.SendingDirectoryListing:
-                        len = client.ReadInt();
-                        string[] dirs = new string[len];
-                        for (int i = 0; i < len; i++)
-                            dirs[i] = client.ReadString();
-                        OnDirectoryListingRecieved(new DirectoryListingRecievedEventArgs { Client = client, Directories = dirs });
-                        break;
-                    case (byte)GlassProtocol.SendingError:
-                        Console.WriteLine("ERROR! {0}", client.ReadString());
-                        break;
-                    case (byte)GlassProtocol.SendingFile:
-                        ReadInput = false;
-                        OnFileRecieved(new FileRecievedEventArgs { Client = client, Length = client.ReadLong(), BinaryReader = client.Reader });
-                        break;
-                    case (byte)GlassProtocol.SendingFileListing:
-                        len = client.ReadInt();
-                        string[] files = new string[len];
-                        for (int i = 0; i < len; i++)
-                            files[i] = client.ReadString();
-                        OnFileListingRecieved(new FileListingRecievedEventArgs { Client = client, Files = files });
-                        break;
-                    case (byte)GlassProtocol.SendingProgramStdout:
-                        OnStdoutReecieved(new StdoutRecievedEventArgs { Line = client.ReadString() });
-                        break;
-                    case (byte)GlassProtocol.SendingProcList:
-                        OnProcListRecieved(new ProcListRecievedEventArgs { ProcList = client.ReadString() });
-                        break;
+                    OnClientDisconnected(new ClientDisconnectedEventArgs { Client = client });
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Local error: {0}", ex.Message);
                 }
             }
         }

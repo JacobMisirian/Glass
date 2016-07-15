@@ -20,6 +20,7 @@ namespace GlassServer
 
             GlassListener.ClientConnected += listener_ClientConnected;
 
+            GlassClientManager.ClientDisconnected += manager_ClientDisconnected;
             GlassClientManager.CurrentDirectoryRecieved += manager_DirectoryRecieved;
             GlassClientManager.DirectoryListingRecieved += manager_DirectoryListingRecieved;
             GlassClientManager.FileListingRecieved += manager_FileListingRecieved;
@@ -36,114 +37,129 @@ namespace GlassServer
             int selectedClientID = 0;
             while (true)
             {
-                Console.Write("$ ");
-                string command = Console.ReadLine();
-                string[] parts = command.Split(' ');
-                string remainder = null;
-                if (parts.Length >= 2)
-                    remainder = command.Substring(command.IndexOf(" ") + 1);
-                switch (parts[0].ToLower())
+                try
                 {
-                    case "select":
-                        try
-                        {
-                            int id = Convert.ToInt32(parts[1]);
-                            selectedClient = IdentifiedClients[id];
-                            selectedClientID = id;
-                        }
-                        catch
-                        {
-                            Console.WriteLine("Was not a number!");
-                        }
-                        break;
-                    case "selected":
-                        Console.WriteLine("{0}:\t{1} {2}", selectedClientID, selectedClient.UserName, selectedClient.IP);
-                        break;
-                    case "info":
-                        var cl = IdentifiedClients[Convert.ToInt32(parts[1])];
-                        Console.WriteLine("{0}:\t{1} {2}", parts[1], cl.UserName, cl.IP);
-                        break;
-                    case "list":
-                        foreach (var pair in IdentifiedClients)
-                            Console.WriteLine("{0}:\t{1} {2}", pair.Key, pair.Value.UserName, pair.Value.IP);
-                        break;
-                    case "pwd":
-                        selectedClient.WriteLine(GlassProtocol.RequestCurrentDirectory);
-                        break;
-                    case "ls":
-                        selectedClient.WriteLine(GlassProtocol.RequestDirectoryListing);
-                        selectedClient.WriteLine(parts.Length < 2 ? selectedClient.CurrentDirectory : remainder);
-                        selectedClient.WriteLine(GlassProtocol.RequestFileListing);
-                        selectedClient.WriteLine(parts.Length < 2 ? selectedClient.CurrentDirectory : remainder);
-                        break;
-                    case "dl":
-                        selectedClient.WriteLine(GlassProtocol.RequestFileDownload);
-                        selectedClient.WriteLine(parts[1]);
-                        selectedClient.WriteLine(parts[2]);
-                        break;
-                    case "cd":
-                        selectedClient.WriteLine(GlassProtocol.SetCurrentDirectory);
-                        selectedClient.WriteLine(remainder);
-                        selectedClient.CurrentDirectory = remainder;
-                        break;
-                    case "get":
-                        selectedClient.WriteLine(GlassProtocol.RequestFile);
-                        selectedClient.WriteLine(remainder);
-                        selectedClient.FileJobs.Push(remainder);
-                        break;
-                    case "put":
-                        selectedClient.WriteLine(GlassProtocol.SendingFile);
-                        selectedClient.WriteLine(parts[2]);
-                        selectedClient.WriteLine(new FileInfo(parts[1]).Length);
-                        BinaryReader file = new BinaryReader(new StreamReader(parts[1]).BaseStream);
-                        while (file.BaseStream.Position < file.BaseStream.Length)
-                            selectedClient.Writer.Write(file.ReadByte());
-                        file.Close();
-                        selectedClient.Writer.Flush();
-                        break;
-                    case "rm":
-                        selectedClient.WriteLine(GlassProtocol.RequestDeleteFile);
-                        selectedClient.WriteLine(remainder);
-                        break;
-                    case "rmd":
-                        selectedClient.WriteLine(GlassProtocol.RequestDeleteDir);
-                        selectedClient.WriteLine(remainder);
-                        break;
-                    case "mv":
-                        selectedClient.WriteLine(GlassProtocol.RequestFileMove);
-                        selectedClient.WriteLine(parts[1]);
-                        selectedClient.WriteLine(parts[2]);
-                        break;
-                    case "cp":
-                        selectedClient.WriteLine(GlassProtocol.RequestFileCopy);
-                        selectedClient.WriteLine(parts[1]);
-                        selectedClient.WriteLine(parts[2]);
-                        break;
-                    case "proclist":
-                        selectedClient.WriteLine(GlassProtocol.RequestProcList);
-                        break;
-                    case "kill":
-                        selectedClient.WriteLine(GlassProtocol.RequestProcKill);
-                        selectedClient.WriteLine(remainder);
-                        break;
-                    case "coderun":
-                        selectedClient.WriteLine(GlassProtocol.RequestCodeRun);
-                        selectedClient.WriteLine(File.ReadAllText(remainder));
-                        break;
-                    case "msg":
-                        selectedClient.WriteLine(GlassProtocol.RequestMessageDisplay);
-                        selectedClient.WriteLine(remainder);
-                        break;
-                    case "start":
-                        selectedClient.WriteLine(GlassProtocol.RequestProgramStart);
-                        selectedClient.WriteLine(parts[1]);
-                        selectedClient.WriteLine(parts.Length > 2 ? remainder.Substring(remainder.IndexOf(" ") + 1) : "");
-                        break;
-                    case "getstart":
-                        selectedClient.WriteLine(GlassProtocol.RequestProgramStartStdout);
-                        selectedClient.WriteLine(parts[1]);
-                        selectedClient.WriteLine(parts.Length > 2 ? remainder.Substring(remainder.IndexOf(" ") + 1) : "");
-                        break;
+                    Console.Write("$ ");
+                    string command = Console.ReadLine();
+                    string[] parts = command.Split(' ');
+                    string remainder = null;
+                    if (parts.Length >= 2)
+                        remainder = command.Substring(command.IndexOf(" ") + 1);
+                    switch (parts[0].ToLower())
+                    {
+                        case "select":
+                            try
+                            {
+                                int id = Convert.ToInt32(parts[1]);
+                                selectedClient = IdentifiedClients[id];
+                                selectedClientID = id;
+                            }
+                            catch
+                            {
+                                Console.WriteLine("Was not a number!");
+                            }
+                            break;
+                        case "selected":
+                            Console.WriteLine("{0}:\t{1} {2}", selectedClientID, selectedClient.UserName, selectedClient.IP);
+                            break;
+                        case "info":
+                            var cl = IdentifiedClients[Convert.ToInt32(parts[1])];
+                            Console.WriteLine("{0}:\t{1} {2}", parts[1], cl.UserName, cl.IP);
+                            break;
+                        case "list":
+                            foreach (var pair in IdentifiedClients)
+                                Console.WriteLine("{0}:\t{1} {2}", pair.Key, pair.Value.UserName, pair.Value.IP);
+                            break;
+                        case "pwd":
+                            selectedClient.WriteLine(GlassProtocol.RequestCurrentDirectory);
+                            break;
+                        case "ls":
+                            selectedClient.WriteLine(GlassProtocol.RequestDirectoryListing);
+                            selectedClient.WriteLine(parts.Length < 2 ? selectedClient.CurrentDirectory : remainder);
+                            selectedClient.WriteLine(GlassProtocol.RequestFileListing);
+                            selectedClient.WriteLine(parts.Length < 2 ? selectedClient.CurrentDirectory : remainder);
+                            break;
+                        case "dl":
+                            selectedClient.WriteLine(GlassProtocol.RequestFileDownload);
+                            selectedClient.WriteLine(parts[1]);
+                            selectedClient.WriteLine(parts[2]);
+                            break;
+                        case "cd":
+                            selectedClient.WriteLine(GlassProtocol.SetCurrentDirectory);
+                            selectedClient.WriteLine(remainder);
+                            selectedClient.CurrentDirectory = remainder;
+                            break;
+                        case "get":
+                            selectedClient.WriteLine(GlassProtocol.RequestFile);
+                            selectedClient.WriteLine(remainder);
+                            selectedClient.FileJobs.Push(remainder);
+                            break;
+                        case "put":
+                            selectedClient.WriteLine(GlassProtocol.SendingFile);
+                            selectedClient.WriteLine(parts[2]);
+                            selectedClient.WriteLine(new FileInfo(parts[1]).Length);
+                            BinaryReader file = new BinaryReader(new StreamReader(parts[1]).BaseStream);
+                            while (file.BaseStream.Position < file.BaseStream.Length)
+                                selectedClient.Writer.Write(file.ReadByte());
+                            file.Close();
+                            selectedClient.Writer.Flush();
+                            break;
+                        case "rm":
+                            selectedClient.WriteLine(GlassProtocol.RequestDeleteFile);
+                            selectedClient.WriteLine(remainder);
+                            break;
+                        case "rmd":
+                            selectedClient.WriteLine(GlassProtocol.RequestDeleteDir);
+                            selectedClient.WriteLine(remainder);
+                            break;
+                        case "mv":
+                            selectedClient.WriteLine(GlassProtocol.RequestFileMove);
+                            selectedClient.WriteLine(parts[1]);
+                            selectedClient.WriteLine(parts[2]);
+                            break;
+                        case "cp":
+                            selectedClient.WriteLine(GlassProtocol.RequestFileCopy);
+                            selectedClient.WriteLine(parts[1]);
+                            selectedClient.WriteLine(parts[2]);
+                            break;
+                        case "proclist":
+                            selectedClient.WriteLine(GlassProtocol.RequestProcList);
+                            break;
+                        case "kill":
+                            selectedClient.WriteLine(GlassProtocol.RequestProcKill);
+                            selectedClient.WriteLine(remainder);
+                            break;
+                        case "coderun":
+                            selectedClient.WriteLine(GlassProtocol.RequestCodeRun);
+                            selectedClient.WriteLine(File.ReadAllText(remainder));
+                            break;
+                        case "msg":
+                            selectedClient.WriteLine(GlassProtocol.RequestMessageDisplay);
+                            selectedClient.WriteLine(remainder);
+                            break;
+                        case "start":
+                            selectedClient.WriteLine(GlassProtocol.RequestProgramStart);
+                            selectedClient.WriteLine(parts[1]);
+                            selectedClient.WriteLine(parts.Length > 2 ? remainder.Substring(remainder.IndexOf(" ") + 1) : "");
+                            break;
+                        case "getstart":
+                            selectedClient.WriteLine(GlassProtocol.RequestProgramStartStdout);
+                            selectedClient.WriteLine(parts[1]);
+                            selectedClient.WriteLine(parts.Length > 2 ? remainder.Substring(remainder.IndexOf(" ") + 1) : "");
+                            break;
+                    }
+                }
+                catch (NullReferenceException)
+                {
+                    Console.WriteLine("No client selected!");
+                }
+                catch (IOException)
+                {
+                    manager_ClientDisconnected(null, new ClientDisconnectedEventArgs { Client = selectedClient });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error caught! " + ex.Message);
                 }
             }
         }
@@ -152,6 +168,20 @@ namespace GlassServer
         {
             GlassClientManager.RegisterClient(e.Client);
             e.Client.WriteLine(GlassProtocol.RequestCurrentDirectory);
+        }
+
+        private void manager_ClientDisconnected(object sender, ClientDisconnectedEventArgs e)
+        {
+            int removalClient = -1;
+            foreach (var pair in IdentifiedClients)
+                if (pair.Value == e.Client)
+                {
+                    Console.WriteLine("Client {0} has disconnected!", pair.Key);
+                    removalClient = pair.Key;
+                    break;
+                }
+            if (removalClient != -1)
+                IdentifiedClients.Remove(removalClient);
         }
 
         private int id = 0;
