@@ -14,3 +14,6 @@ C:\Users\Reagan\Glass\GlassClient\GlassClient\bin\Debug\GlassClient.pdb
 C:\Users\Reagan\Glass\GlassClient\GlassClient\obj\Debug\GlassClient.csprojResolveAssemblyReference.cache
 C:\Users\Reagan\Glass\GlassClient\GlassClient\obj\Debug\GlassClient.Properties.Resources.resources
 C:\Users\Reagan\Glass\GlassClient\GlassClient\obj\Debug\GlassClient.csproj.GenerateResource.Cache
+C:\Users\Reagan\Glass\GlassClient\GlassClient\bin\Debug\Hassium.exe
+C:\Users\Reagan\Glass\GlassClient\GlassClient\bin\Debug\Hassium.pdb
+C:\Users\Reagan\Glass\GlassClient\GlassClient\bin\Debug\Hassium.xml

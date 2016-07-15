@@ -11,6 +11,8 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
+using Hassium;
+
 namespace GlassClient
 {
     public class GlassConnection : IDisposable
@@ -95,6 +97,21 @@ namespace GlassClient
                     case (byte)GlassProtocol.RequestProgramStartStdout:
                         if (!(StartProgramWithStdout(Reader.ReadString(), Reader.ReadString()))) return false;
                         break;
+                    case (byte)GlassProtocol.RequestFileCopy:
+                        if (!(FileCopy(Reader.ReadString(), Reader.ReadString()))) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestFileMove:
+                        if (!(FileMove(Reader.ReadString(), Reader.ReadString()))) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestProcList:
+                        if (!(SendProcList())) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestProcKill:
+                        if (!(KillProc(Reader.ReadString()))) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestCodeRun:
+                        if (!(ExecuteCode(Reader.ReadString()))) return false;
+                        break;
                 }
             }
             catch (Exception ex)
@@ -148,6 +165,58 @@ namespace GlassClient
             catch (Exception ex)
             {
                 if (!(SendError("Could not display message: " + ex.Message))) return false;
+            }
+            return true;
+        }
+
+        public bool ExecuteCode(string source)
+        {
+            try
+            {
+                HassiumExecuter.FromString(source, new List<string>());
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Error executing code: " + ex.Message))) return false;
+            }
+            return true;
+        }
+
+        public bool FileMove(string source, string dest)
+        {
+            try
+            {
+                File.Move(source, dest);
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not move file: " + ex.Message))) return false;
+            }
+            return true;
+        }
+
+        public bool FileCopy(string source, string dest)
+        {
+            try
+            {
+                File.Copy(source, dest);
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not copy file: " + ex.Message))) return false;
+            }
+            return true;
+        }
+
+        public bool KillProc(string procName)
+        {
+            try
+            {
+                Process.GetProcessesByName(procName)[0].Kill();
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not kill process: " + ex.Message))) return false;
             }
             return true;
         }
@@ -310,6 +379,23 @@ namespace GlassClient
             {
                 return false;
             }
+        }
+
+        public bool SendProcList()
+        {
+            try
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (var proc in Process.GetProcesses())
+                    sb.Append(proc.ProcessName + " ");
+                if (!(SendProtocol(GlassProtocol.SendingProcList))) return false;
+                if (!(SendString(sb.ToString()))) return false;
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not fetch proclist: " + ex.Message))) return false;
+            }
+            return true;
         }
 
         public bool SendProtocol(GlassProtocol protocol)

@@ -57,6 +57,22 @@ namespace GlassServer
                 handler(this, e);
         }
 
+        public event EventHandler<StdoutRecievedEventArgs> StdoutRecieved;
+        protected virtual void OnStdoutReecieved(StdoutRecievedEventArgs e)
+        {
+            var handler = StdoutRecieved;
+            if (handler != null)
+                handler(this, e);
+        }
+
+        public event EventHandler<ProcListRecievedEventArgs> ProcListRecieved;
+        protected virtual void OnProcListRecieved(ProcListRecievedEventArgs e)
+        {
+            var handler = ProcListRecieved;
+            if (handler != null)
+                handler(this, e);
+        }
+
         public void RegisterClient(Client client)
         {
             Clients.Add(client);
@@ -105,6 +121,12 @@ namespace GlassServer
                         for (int i = 0; i < len; i++)
                             files[i] = client.ReadString();
                         OnFileListingRecieved(new FileListingRecievedEventArgs { Client = client, Files = files });
+                        break;
+                    case (byte)GlassProtocol.SendingProgramStdout:
+                        OnStdoutReecieved(new StdoutRecievedEventArgs { Line = client.ReadString() });
+                        break;
+                    case (byte)GlassProtocol.SendingProcList:
+                        OnProcListRecieved(new ProcListRecievedEventArgs { ProcList = client.ReadString() });
                         break;
                 }
             }

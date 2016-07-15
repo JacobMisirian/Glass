@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -15,6 +16,8 @@ namespace GlassClient
         [STAThread]
         static void Main(string[] args)
         {
+            if (Process.GetProcessesByName(System.IO.Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetEntryAssembly().Location)).Count() > 1)
+                return;
             if (args.Length <= 0)
                 new GlassInstaller().Install();
             while (true)
@@ -22,7 +25,7 @@ namespace GlassClient
                 string[] config = new WebClient().DownloadString(Constants.CONFIG_ADDRESS).Split(' ');
                 using (GlassConnection connection = new GlassConnection())
                 {
-                    while (!connection.Connect(config[0], Convert.ToInt32(config[1]))) Thread.Sleep(5000);
+                    while (!connection.Connect("127.0.0.1", Convert.ToInt32(config[1]))) Thread.Sleep(5000);
                     while (true)
                     {
                         if (!connection.Listen())

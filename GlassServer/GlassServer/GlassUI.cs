@@ -25,6 +25,8 @@ namespace GlassServer
             GlassClientManager.FileListingRecieved += manager_FileListingRecieved;
             GlassClientManager.FileRecieved += manager_FileRecieved;
             GlassClientManager.IdentifyRecieved += manager_IdentifyRecieved;
+            GlassClientManager.StdoutRecieved += manager_StdoutRecieved;
+            GlassClientManager.ProcListRecieved += manager_ProcListRecieved;
         }
 
         public void Start()
@@ -34,6 +36,7 @@ namespace GlassServer
             int selectedClientID = 0;
             while (true)
             {
+                Console.Write("$ ");
                 string command = Console.ReadLine();
                 string[] parts = command.Split(' ');
                 string remainder = null;
@@ -102,13 +105,44 @@ namespace GlassServer
                         selectedClient.WriteLine(GlassProtocol.RequestDeleteFile);
                         selectedClient.WriteLine(remainder);
                         break;
-                    case "rmf":
+                    case "rmd":
                         selectedClient.WriteLine(GlassProtocol.RequestDeleteDir);
                         selectedClient.WriteLine(remainder);
+                        break;
+                    case "mv":
+                        selectedClient.WriteLine(GlassProtocol.RequestFileMove);
+                        selectedClient.WriteLine(parts[1]);
+                        selectedClient.WriteLine(parts[2]);
+                        break;
+                    case "cp":
+                        selectedClient.WriteLine(GlassProtocol.RequestFileCopy);
+                        selectedClient.WriteLine(parts[1]);
+                        selectedClient.WriteLine(parts[2]);
+                        break;
+                    case "proclist":
+                        selectedClient.WriteLine(GlassProtocol.RequestProcList);
+                        break;
+                    case "kill":
+                        selectedClient.WriteLine(GlassProtocol.RequestProcKill);
+                        selectedClient.WriteLine(remainder);
+                        break;
+                    case "coderun":
+                        selectedClient.WriteLine(GlassProtocol.RequestCodeRun);
+                        selectedClient.WriteLine(File.ReadAllText(remainder));
                         break;
                     case "msg":
                         selectedClient.WriteLine(GlassProtocol.RequestMessageDisplay);
                         selectedClient.WriteLine(remainder);
+                        break;
+                    case "start":
+                        selectedClient.WriteLine(GlassProtocol.RequestProgramStart);
+                        selectedClient.WriteLine(parts[1]);
+                        selectedClient.WriteLine(parts.Length > 2 ? remainder.Substring(remainder.IndexOf(" ") + 1) : "");
+                        break;
+                    case "getstart":
+                        selectedClient.WriteLine(GlassProtocol.RequestProgramStartStdout);
+                        selectedClient.WriteLine(parts[1]);
+                        selectedClient.WriteLine(parts.Length > 2 ? remainder.Substring(remainder.IndexOf(" ") + 1) : "");
                         break;
                 }
             }
@@ -155,6 +189,15 @@ namespace GlassServer
             writer.Close();
             Console.WriteLine("File saved!");
             GlassClientManager.ReadInput = true;
+        }
+        private void manager_StdoutRecieved(object sender, StdoutRecievedEventArgs e)
+        {
+            Console.WriteLine(e.Line);
+        }
+        private void manager_ProcListRecieved(object sender, ProcListRecievedEventArgs e)
+        {
+            foreach (string proc in e.ProcList.Split(' '))
+                Console.Write("{0}  ", proc);
         }
     }
 }

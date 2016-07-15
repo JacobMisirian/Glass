@@ -20,8 +20,16 @@ namespace GlassServer
         SendingError = 0x0D,
         RequestDeleteFile = 0x0E,
         RequestDeleteDir = 0x0F,
-        RequestMessageDisplay = 0x10
-
+        RequestMessageDisplay = 0x10,
+        RequestProgramStart = 0x11,
+        RequestProgramStartStdout = 0x12,
+        SendingProgramStdout = 0x13,
+        RequestFileCopy = 0x14,
+        RequestFileMove = 0x15,
+        RequestProcList = 0x16,
+        SendingProcList = 0x17,
+        RequestProcKill = 0x18,
+        RequestCodeRun = 0x19
     }
 }
 

