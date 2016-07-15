@@ -30,10 +30,10 @@ namespace GlassServer
             GlassClientManager.ProcListRecieved += manager_ProcListRecieved;
         }
 
+        private Client selectedClient = null;
         public void Start()
         {
             GlassListener.ListenForConnections();
-            Client selectedClient = null;
             int selectedClientID = 0;
             while (true)
             {
@@ -176,6 +176,8 @@ namespace GlassServer
             foreach (var pair in IdentifiedClients)
                 if (pair.Value == e.Client)
                 {
+                    if (pair.Value == selectedClient)
+                        selectedClient = null;
                     Console.WriteLine("Client {0} has disconnected!", pair.Key);
                     removalClient = pair.Key;
                     break;
