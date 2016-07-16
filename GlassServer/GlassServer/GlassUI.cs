@@ -117,10 +117,25 @@ namespace GlassServer
                             selectedClient.WriteLine(parts[1]);
                             selectedClient.WriteLine(parts[2]);
                             break;
+                        case "cat":
+                            selectedClient.WriteLine(GlassProtocol.RequestFileText);
+                            selectedClient.WriteLine(remainder);
+                            break;
                         case "cp":
                             selectedClient.WriteLine(GlassProtocol.RequestFileCopy);
                             selectedClient.WriteLine(parts[1]);
                             selectedClient.WriteLine(parts[2]);
+                            break;
+                        case "mp":
+                            selectedClient.WriteLine(GlassProtocol.RequestSetMousePosition);
+                            selectedClient.WriteLine(Convert.ToInt64(parts[1]));
+                            selectedClient.WriteLine(Convert.ToInt64(parts[2]));
+                            break;
+                        case "leftclick":
+                            selectedClient.WriteLine(GlassProtocol.RequestLeftMouseClick);
+                            break;
+                        case "rightclick":
+                            selectedClient.WriteLine(GlassProtocol.RequestRightMouseClick);
                             break;
                         case "proclist":
                             selectedClient.WriteLine(GlassProtocol.RequestProcList);

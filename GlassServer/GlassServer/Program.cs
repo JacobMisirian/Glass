@@ -9,7 +9,7 @@ namespace GlassServer
     {
         public static void Main(string[] args)
         {
-            new GlassUI("127.0.0.1", 1337).Start();
+            new GlassUI(args[0], Convert.ToInt32(args[1])).Start();
         }
     }   
 }

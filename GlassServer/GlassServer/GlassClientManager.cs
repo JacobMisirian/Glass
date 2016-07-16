@@ -81,6 +81,14 @@ namespace GlassServer
                 handler(this, e);
         }
 
+        public event EventHandler<FileTextRecievedEventArgs> FileTextRecieved;
+        protected virtual void OnFileTextRecieved(FileTextRecievedEventArgs e)
+        {
+            var handler = FileTextRecieved;
+            if (handler != null)
+                handler(this, e);
+        }
+
         public void RegisterClient(Client client)
         {
             Clients.Add(client);
@@ -137,6 +145,9 @@ namespace GlassServer
                             break;
                         case (byte)GlassProtocol.SendingProcList:
                             OnProcListRecieved(new ProcListRecievedEventArgs { ProcList = client.ReadString() });
+                            break;
+                        case (byte)GlassProtocol.SendingFileText:
+                            OnFileTextRecieved(new FileTextRecievedEventArgs { FileText = client.ReadString() });
                             break;
                     }
                 }

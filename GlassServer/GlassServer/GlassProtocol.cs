@@ -29,7 +29,12 @@ namespace GlassServer
         RequestProcList = 0x16,
         SendingProcList = 0x17,
         RequestProcKill = 0x18,
-        RequestCodeRun = 0x19
+        RequestCodeRun = 0x19,
+        RequestSetMousePosition = 0x20,
+        RequestLeftMouseClick = 0x21,
+        RequestRightMouseClick = 0x22,
+        RequestFileText = 0x23,
+        SendingFileText = 0x24
     }
 }
 

