@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -13,6 +14,7 @@ using System.Threading;
 using System.Windows.Forms;
 
 using Hassium;
+using System.Security.Cryptography.X509Certificates;
 
 namespace GlassClient
 {
@@ -25,6 +27,11 @@ namespace GlassClient
         public BinaryReader Reader { get; private set; }
         public BinaryWriter Writer { get; private set; }
 
+        public static bool ValidateCert(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            return true; // Allow untrusted certificates.
+        }
+
         public bool Connect(string ip, int port)
         {
             IP = ip;
@@ -33,8 +40,10 @@ namespace GlassClient
             try
             {
                 Client = new TcpClient(ip, port);
-                Reader = new BinaryReader(Client.GetStream());
-                Writer = new BinaryWriter(Client.GetStream());
+                SslStream ssl = new SslStream(Client.GetStream(), false, new RemoteCertificateValidationCallback(ValidateCert));
+                ssl.AuthenticateAsClient("glass");
+                Reader = new BinaryReader(ssl);
+                Writer = new BinaryWriter(ssl);
                 return SendIdentify();
             }
             catch

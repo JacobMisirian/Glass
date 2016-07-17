@@ -32,6 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientDisconnectedEventArgs.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="Events\FileTextRecievedEventArgs.cs" />
     <Compile Include="Events\ProcListRecievedEventArgs.cs" />
     <Compile Include="Events\StdoutRecievedEventArgs.cs" />

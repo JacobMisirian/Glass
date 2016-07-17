@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -24,8 +25,10 @@ namespace GlassServer
         public Client(TcpClient client)
         {
             TcpClient = client;
-            Reader = new BinaryReader(client.GetStream());
-            Writer = new BinaryWriter(client.GetStream());
+            SslStream ssl = new SslStream(client.GetStream(), false);
+            ssl.AuthenticateAsServer(Program.Cert, false, System.Security.Authentication.SslProtocols.Tls, true);
+            Reader = new BinaryReader(ssl);
+            Writer = new BinaryWriter(ssl);
             FileJobs = new Stack<string>();
         }
 

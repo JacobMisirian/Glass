@@ -1,0 +1,8 @@
+C:\Users\Reagan\Glass\GlassClient\GlassClient\bin\Debug\GlassClient.exe.config
+C:\Users\Reagan\Glass\GlassClient\GlassClient\bin\Debug\GlassClient.exe
+C:\Users\Reagan\Glass\GlassClient\GlassClient\bin\Debug\GlassClient.pdb
+C:\Users\Reagan\Glass\GlassClient\GlassClient\obj\Debug\GlassClient.csprojResolveAssemblyReference.cache
+C:\Users\Reagan\Glass\GlassClient\GlassClient\obj\Debug\GlassClient.Properties.Resources.resources
+C:\Users\Reagan\Glass\GlassClient\GlassClient\obj\Debug\GlassClient.csproj.GenerateResource.Cache
+C:\Users\Reagan\Glass\GlassClient\GlassClient\obj\Debug\GlassClient.exe
+C:\Users\Reagan\Glass\GlassClient\GlassClient\obj\Debug\GlassClient.pdb
