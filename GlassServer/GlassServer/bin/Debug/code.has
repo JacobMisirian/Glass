@@ -1,5 +1,0 @@
-use IO;
-
-func main () {
-	File.createFile("C:\\Users\\Reagan\\text.txt");
-}

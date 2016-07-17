@@ -92,8 +92,8 @@ namespace GlassServer
                             break;
                         case "get":
                             selectedClient.WriteLine(GlassProtocol.RequestFile);
-                            selectedClient.WriteLine(remainder);
-                            selectedClient.FileJobs.Push(remainder);
+                            selectedClient.WriteLine(parts[1]);
+                            selectedClient.FileJobs.Push(parts[2]);
                             break;
                         case "put":
                             selectedClient.WriteLine(GlassProtocol.SendingFile);
