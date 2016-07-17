@@ -38,6 +38,10 @@ namespace GlassClient
         RequestLeftMouseClick =     0x21,
         RequestRightMouseClick =    0x22,
         RequestFileText =           0x23,
-        SendingFileText =           0x24
+        SendingFileText =           0x24,
+        RequestCreateDirectory =    0x25,
+        RequestLogout =             0x26,
+        RequestRestart =            0x27,
+        RequestShutdown =           0x28
     }
 }

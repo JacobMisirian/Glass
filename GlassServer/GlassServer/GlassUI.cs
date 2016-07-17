@@ -132,6 +132,10 @@ namespace GlassServer
                             selectedClient.WriteLine(Convert.ToInt64(parts[1]));
                             selectedClient.WriteLine(Convert.ToInt64(parts[2]));
                             break;
+                        case "mkdir":
+                            selectedClient.WriteLine(GlassProtocol.RequestCreateDirectory);
+                            selectedClient.WriteLine(remainder);
+                            break;
                         case "leftclick":
                             selectedClient.WriteLine(GlassProtocol.RequestLeftMouseClick);
                             break;
@@ -162,6 +166,15 @@ namespace GlassServer
                             selectedClient.WriteLine(GlassProtocol.RequestProgramStartStdout);
                             selectedClient.WriteLine(parts[1]);
                             selectedClient.WriteLine(parts.Length > 2 ? remainder.Substring(remainder.IndexOf(" ") + 1) : "");
+                            break;
+                        case "logout":
+                            selectedClient.WriteLine(GlassProtocol.RequestLogout);
+                            break;
+                        case "restart":
+                            selectedClient.WriteLine(GlassProtocol.RequestRestart);
+                            break;
+                        case "shutdown":
+                            selectedClient.WriteLine(GlassProtocol.RequestShutdown);
                             break;
                     }
                 }

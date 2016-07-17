@@ -125,11 +125,36 @@ namespace GlassClient
                     case (byte)GlassProtocol.RequestFileText:
                         if (!(SendFileText(Reader.ReadString()))) return false;
                         break;
+                    case (byte)GlassProtocol.RequestCreateDirectory:
+                        if (!(CreateDirectory(Reader.ReadString()))) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestLogout:
+                        if (!(Logout())) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestRestart:
+                        if (!(Restart())) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestShutdown:
+                        if (!(Shutdown())) return false;
+                        break;
                 }
             }
             catch (Exception ex)
             {
                 if (!(SendError("Error encountered: " + ex.Message))) return false;
+            }
+            return true;
+        }
+
+        public bool CreateDirectory(string path)
+        {
+            try
+            {
+                Directory.CreateDirectory(path);
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not create directory: " + ex.Message))) return false;
             }
             return true;
         }
@@ -230,6 +255,47 @@ namespace GlassClient
             catch (Exception ex)
             {
                 if (!(SendError("Could not kill process: " + ex.Message))) return false;
+            }
+            return true;
+        }
+
+        [DllImport("user32")]
+        public static extern bool ExitWindowsEx(uint uFlags, uint dwReason);
+        public bool Logout()
+        {
+            try
+            {
+                ExitWindowsEx(0, 0);
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not logout: " + ex.Message))) return false;
+            }
+            return true;
+        }
+
+        public bool Restart()
+        {
+            try
+            {
+                Process.Start("shutdown", "/t 0");
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not restart: " + ex.Message))) return false;
+            }
+            return true;
+        }
+
+        public bool Shutdown()
+        {
+            try
+            {
+                Process.Start("shutdown", "/r /t 0");
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not shutdown: " + ex.Message))) return false;
             }
             return true;
         }
@@ -356,7 +422,6 @@ namespace GlassClient
             {
                 string text = File.ReadAllText(path);
                 if (!(SendProtocol(GlassProtocol.SendingFileText))) return false;
-                if (!(SendInt(text.Length))) return false;
                 if (!(SendString(text))) return false;
             }
             catch (Exception ex)
