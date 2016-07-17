@@ -1,2 +1,4 @@
 Constants.cs
 *.exe*
+/bin/
+/obj/
