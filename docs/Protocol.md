@@ -10,6 +10,7 @@ streams.
 ### RequestScreen (0x00) - SendingScreen (0x01)
 
 Server: ```(byte)RequestScreen```
+
 Client: ```(byte)SendingScreen (int)Width (int)Height [(byte)R, (byte)B, (byte)G]...```
 
 ### RequestFile (0x03) - SendingFile (0x04)
