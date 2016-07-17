@@ -28,6 +28,7 @@ namespace GlassServer
             GlassClientManager.IdentifyRecieved += manager_IdentifyRecieved;
             GlassClientManager.StdoutRecieved += manager_StdoutRecieved;
             GlassClientManager.ProcListRecieved += manager_ProcListRecieved;
+            GlassClientManager.FileTextRecieved += manager_FileTextRecieved;
         }
 
         private Client selectedClient = null;
@@ -246,6 +247,9 @@ namespace GlassServer
             foreach (string proc in e.ProcList.Split(' '))
                 Console.Write("{0}  ", proc);
         }
+        private void manager_FileTextRecieved(object sender, FileTextRecievedEventArgs e)
+        {
+            Console.WriteLine(e.FileText);
+        }
     }
 }
-

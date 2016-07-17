@@ -122,7 +122,7 @@ namespace GlassClient
                     case (byte)GlassProtocol.RequestRightMouseClick:
                         if (!(RightMouseClick())) return false;
                         break;
-                    case (byte)GlassProtocol.SendingFileText:
+                    case (byte)GlassProtocol.RequestFileText:
                         if (!(SendFileText(Reader.ReadString()))) return false;
                         break;
                 }
