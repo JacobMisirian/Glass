@@ -51,6 +51,7 @@
     <Compile Include="GlassConnection.cs" />
     <Compile Include="GlassInstaller.cs" />
     <Compile Include="GlassProtocol.cs" />
+    <Compile Include="IExecutable.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">

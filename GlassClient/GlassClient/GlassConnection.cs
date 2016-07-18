@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -121,6 +122,9 @@ namespace GlassClient
                         break;
                     case (byte)GlassProtocol.RequestCodeRun:
                         if (!(ExecuteCode(Reader.ReadString()))) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestDllLoad:
+                        if (!(LoadDll(Reader.ReadInt32(), Reader.ReadString()))) return false;
                         break;
                     case (byte)GlassProtocol.RequestSetMousePosition:
                         if (!(SetMousePosition((int)Reader.ReadInt64(), (int)Reader.ReadInt64()))) return false;
@@ -266,6 +270,43 @@ namespace GlassClient
                 if (!(SendError("Could not kill process: " + ex.Message))) return false;
             }
             return true;
+        }
+
+        public bool LoadDll(int length, string arg)
+        {
+            try
+            {
+                byte[] bytes = new byte[length];
+                for (int i = 0; i < bytes.Length; i++)
+                    bytes[i] = Reader.ReadByte();
+                Assembly ass = Assembly.Load(bytes);
+                foreach (var type in ass.GetTypes())
+                {
+                    if (type.GetInterface(typeof(IExecutable).FullName) != null)
+                    {
+                        IExecutable dll = (IExecutable)Activator.CreateInstance(type);
+                        new Thread(() => runIExecutable(dll, arg)).Start();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not load DLL: " + ex.Message))) return false;
+            }
+            return true;
+        }
+
+        private void runIExecutable(IExecutable dll, string arg)
+        {
+            try
+            {
+                SendProtocol(GlassProtocol.SendingProgramStdout);
+                SendString(dll.Main(arg));
+            }
+            catch (Exception ex)
+            {
+                SendError("Could not execute DLL: " + ex.Message);
+            }
         }
 
         [DllImport("user32")]

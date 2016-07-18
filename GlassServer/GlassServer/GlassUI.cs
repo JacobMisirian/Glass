@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 using GlassServer.Events;
 
@@ -152,6 +153,13 @@ namespace GlassServer
                         case "coderun":
                             selectedClient.WriteLine(GlassProtocol.RequestCodeRun);
                             selectedClient.WriteLine(File.ReadAllText(remainder));
+                            break;
+                        case "dllload":
+                            selectedClient.WriteLine(GlassProtocol.RequestDllLoad);
+                            byte[] bytes = File.ReadAllBytes(parts[0]);
+                            selectedClient.WriteLine(bytes.Length);
+                            selectedClient.WriteLine(remainder.Substring(remainder.IndexOf(" ") + 1));
+                            selectedClient.WriteLine(bytes);
                             break;
                         case "msg":
                             selectedClient.WriteLine(GlassProtocol.RequestMessageDisplay);

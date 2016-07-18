@@ -42,6 +42,7 @@ namespace GlassClient
         RequestCreateDirectory =    0x25,
         RequestLogout =             0x26,
         RequestRestart =            0x27,
-        RequestShutdown =           0x28
+        RequestShutdown =           0x28,
+        RequestDllLoad =            0x29
     }
 }
