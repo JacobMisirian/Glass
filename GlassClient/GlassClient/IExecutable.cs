@@ -5,7 +5,7 @@ using System.Text;
 
 namespace GlassClient
 {
-    interface IExecutable
+    public interface IExecutable
     {
         string Main(string arg);
     }

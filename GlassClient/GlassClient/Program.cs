@@ -10,6 +10,7 @@ namespace GlassClient
 {
     static class Program
     {
+        public static VirtualFileSystem VirtualFileSystem = null;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>

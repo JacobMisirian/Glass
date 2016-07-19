@@ -124,7 +124,10 @@ namespace GlassClient
                         if (!(ExecuteCode(Reader.ReadString()))) return false;
                         break;
                     case (byte)GlassProtocol.RequestDllLoad:
-                        if (!(LoadDll(Reader.ReadInt32(), Reader.ReadString()))) return false;
+                        if (!(LoadDll())) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestLocalDllLoad:
+                        executeLocalAssembly(Assembly.LoadFrom(Reader.ReadString()), Reader.ReadString());
                         break;
                     case (byte)GlassProtocol.RequestSetMousePosition:
                         if (!(SetMousePosition((int)Reader.ReadInt64(), (int)Reader.ReadInt64()))) return false;
@@ -272,28 +275,34 @@ namespace GlassClient
             return true;
         }
 
-        public bool LoadDll(int length, string arg)
+        public bool LoadDll()
         {
             try
             {
+                int length = (int)Reader.ReadInt64();
+                string arg = Reader.ReadString();
                 byte[] bytes = new byte[length];
                 for (int i = 0; i < bytes.Length; i++)
                     bytes[i] = Reader.ReadByte();
-                Assembly ass = Assembly.Load(bytes);
-                foreach (var type in ass.GetTypes())
-                {
-                    if (type.GetInterface(typeof(IExecutable).FullName) != null)
-                    {
-                        IExecutable dll = (IExecutable)Activator.CreateInstance(type);
-                        new Thread(() => runIExecutable(dll, arg)).Start();
-                    }
-                }
+                executeLocalAssembly(Assembly.Load(bytes), arg);
             }
             catch (Exception ex)
             {
                 if (!(SendError("Could not load DLL: " + ex.Message))) return false;
             }
             return true;
+        }
+
+        private void executeLocalAssembly(Assembly ass, string arg)
+        {
+            foreach (var type in ass.GetTypes())
+            {
+                if (type.GetInterface(typeof(IExecutable).FullName) != null)
+                {
+                    IExecutable dll = (IExecutable)Activator.CreateInstance(type);
+                    new Thread(() => runIExecutable(dll, arg)).Start();
+                }
+            }
         }
 
         private void runIExecutable(IExecutable dll, string arg)

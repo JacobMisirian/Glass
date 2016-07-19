@@ -57,6 +57,11 @@ namespace GlassServer
             return Reader.ReadString();
         }
 
+        public void WriteLine(byte b)
+        {
+            Writer.Write(b);
+            Writer.Flush();
+        }
         public void WriteLine(byte[] data)
         {
             Writer.Write(data);

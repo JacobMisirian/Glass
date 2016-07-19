@@ -156,10 +156,15 @@ namespace GlassServer
                             break;
                         case "dllload":
                             selectedClient.WriteLine(GlassProtocol.RequestDllLoad);
-                            byte[] bytes = File.ReadAllBytes(parts[0]);
-                            selectedClient.WriteLine(bytes.Length);
+                            byte[] bytes = File.ReadAllBytes(parts[1]);
+                            selectedClient.WriteLine((long)bytes.Length);
                             selectedClient.WriteLine(remainder.Substring(remainder.IndexOf(" ") + 1));
-                            selectedClient.WriteLine(bytes);
+                            foreach (byte b in bytes)
+                                selectedClient.WriteLine(b);
+                            break;
+                        case "localdllload":
+                            selectedClient.WriteLine(GlassProtocol.RequestLocalDllLoad);
+                            selectedClient.WriteLine(remainder);
                             break;
                         case "msg":
                             selectedClient.WriteLine(GlassProtocol.RequestMessageDisplay);
