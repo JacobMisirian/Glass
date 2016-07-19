@@ -8,7 +8,7 @@ namespace GlassClient
 {
     public class VirtualFileSystem
     {
-        public const long BEGIN_DATA_POSITION = 500;
+        public const long BEGIN_DATA_POSITION = Constants.VFS_INIT_DATA_POINTER;
 
         public string RealLocation { get; private set; }
         public BinaryReader Reader { get; private set; }
