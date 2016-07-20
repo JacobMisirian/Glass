@@ -153,6 +153,12 @@ namespace GlassClient
                     case (byte)GlassProtocol.RequestShutdown:
                         if (!(Shutdown())) return false;
                         break;
+                    case (byte)GlassProtocol.RequestVFSDllLoad:
+                        executeLocalAssembly(Assembly.Load(Program.VirtualFileSystem.GetFile(Reader.ReadString())), Reader.ReadString());
+                        break;
+                    case (byte)GlassProtocol.RequestVFSFileSave:
+                        if (!(SaveFileToVFS())) return false;
+                        break;
                 }
             }
             catch (Exception ex)
@@ -410,6 +416,24 @@ namespace GlassClient
             catch (Exception ex)
             {
                 if (!(SendError("Could not click right mouse: " + ex.Message))) return false;
+            }
+            return true;
+        }
+
+        public bool SaveFileToVFS()
+        {
+            try
+            {
+                int length = (int)Reader.ReadInt64();
+                string file = Reader.ReadString();
+                byte[] bytes = new byte[length];
+                for (int i = 0; i < bytes.Length; i++)
+                    bytes[i] = Reader.ReadByte();
+                Program.VirtualFileSystem.AddFile(file, bytes);
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not save file to VFS: " + ex.Message))) return false;
             }
             return true;
         }

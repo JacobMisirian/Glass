@@ -106,6 +106,16 @@ namespace GlassServer
                             file.Close();
                             selectedClient.Writer.Flush();
                             break;
+                        case "vfsput":
+                            selectedClient.WriteLine(GlassProtocol.RequestVFSFileSave);
+                            selectedClient.WriteLine(new FileInfo(parts[1]).Length);
+                            selectedClient.WriteLine(parts[2]);
+                            BinaryReader file_ = new BinaryReader(new StreamReader(parts[1]).BaseStream);
+                            while (file_.BaseStream.Position < file_.BaseStream.Length)
+                                selectedClient.Writer.Write(file_.ReadByte());
+                            file_.Close();
+                            selectedClient.Writer.Flush();
+                            break;
                         case "rm":
                             selectedClient.WriteLine(GlassProtocol.RequestDeleteFile);
                             selectedClient.WriteLine(remainder);
@@ -165,6 +175,11 @@ namespace GlassServer
                         case "localdllload":
                             selectedClient.WriteLine(GlassProtocol.RequestLocalDllLoad);
                             selectedClient.WriteLine(remainder);
+                            break;
+                        case "vfsdllload":
+                            selectedClient.WriteLine(GlassProtocol.RequestVFSDllLoad);
+                            selectedClient.WriteLine(parts[1]);
+                            selectedClient.WriteLine(remainder.Substring(remainder.IndexOf(" ") + 1));
                             break;
                         case "msg":
                             selectedClient.WriteLine(GlassProtocol.RequestMessageDisplay);
