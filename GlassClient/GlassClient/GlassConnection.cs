@@ -159,6 +159,15 @@ namespace GlassClient
                     case (byte)GlassProtocol.RequestVFSFileSave:
                         if (!(SaveFileToVFS())) return false;
                         break;
+                    case (byte)GlassProtocol.RequestVFSFileMove:
+                        if (!(MoveVFSFile(Reader.ReadString(), Reader.ReadString()))) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestVFSFile:
+                        if (!(SendVFSFile(Reader.ReadString()))) return false;
+                        break;
+                    case (byte)GlassProtocol.RequestVFSFileText:
+                        if (!(SendVFSFileText(Reader.ReadString()))) return false;
+                        break;
                 }
             }
             catch (Exception ex)
@@ -339,6 +348,19 @@ namespace GlassClient
             return true;
         }
 
+        public bool MoveVFSFile(string name, string dest)
+        {
+            try
+            {
+                File.WriteAllBytes(dest, Program.VirtualFileSystem.GetFile(name));
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not move VFS file: " + ex.Message))) return false;
+            }
+            return true;
+        }
+
         public bool Restart()
         {
             try
@@ -499,21 +521,6 @@ namespace GlassClient
             return true;
         }
 
-        public bool SendFileText(string path)
-        {
-            try
-            {
-                string text = File.ReadAllText(path);
-                if (!(SendProtocol(GlassProtocol.SendingFileText))) return false;
-                if (!(SendString(text))) return false;
-            }
-            catch (Exception ex)
-            {
-                if (!(SendError("Could not send file text: " + ex.Message))) return false;
-            }
-            return true;
-        }
-
         public bool SendFileListing(string path)
         {
             try
@@ -527,6 +534,21 @@ namespace GlassClient
             catch (Exception ex)
             {
                 if (!(SendError("Could not send file listing: " + ex.Message))) return false;
+            }
+            return true;
+        }
+
+        public bool SendFileText(string path)
+        {
+            try
+            {
+                string text = File.ReadAllText(path);
+                if (!(SendProtocol(GlassProtocol.SendingFileText))) return false;
+                if (!(SendString(text))) return false;
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not send file text: " + ex.Message))) return false;
             }
             return true;
         }
@@ -638,6 +660,38 @@ namespace GlassClient
             {
                 return false;
             }
+        }
+
+        public bool SendVFSFile(string file)
+        {
+            try
+            {
+                byte[] data = Program.VirtualFileSystem.GetFile(file);
+                if (!(SendProtocol(GlassProtocol.SendingFile))) return false;
+                if (!(SendLong(data.Length))) return false;
+                foreach (byte b in data)
+                    if (!(SendByte(b))) return false;
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not send VFS file: " + ex.Message))) return false;
+            }
+            return true;
+        }
+
+        public bool SendVFSFileText(string file)
+        {
+            try
+            {
+                string text = ASCIIEncoding.ASCII.GetString(Program.VirtualFileSystem.GetFile(file));
+                if (!(SendProtocol(GlassProtocol.SendingFileText))) return false;
+                if (!(SendString(text))) return false;
+            }
+            catch (Exception ex)
+            {
+                if (!(SendError("Could not send VFS file text: " + ex.Message))) return false;
+            }
+            return true;
         }
 
         public bool SetMousePosition(int x, int y)

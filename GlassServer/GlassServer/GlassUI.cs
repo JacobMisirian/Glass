@@ -96,6 +96,11 @@ namespace GlassServer
                             selectedClient.WriteLine(parts[1]);
                             selectedClient.FileJobs.Push(parts[2]);
                             break;
+                        case "vfsget":
+                            selectedClient.WriteLine(GlassProtocol.RequestVFSFile);
+                            selectedClient.WriteLine(parts[1]);
+                            selectedClient.FileJobs.Push(parts[2]);
+                            break;
                         case "put":
                             selectedClient.WriteLine(GlassProtocol.SendingFile);
                             selectedClient.WriteLine(parts[2]);
@@ -129,8 +134,17 @@ namespace GlassServer
                             selectedClient.WriteLine(parts[1]);
                             selectedClient.WriteLine(parts[2]);
                             break;
+                        case "vfsmv":
+                            selectedClient.WriteLine(GlassProtocol.RequestVFSFIleMove);
+                            selectedClient.WriteLine(parts[1]);
+                            selectedClient.WriteLine(remainder.Substring(remainder.IndexOf(" ") + 1));
+                            break;
                         case "cat":
                             selectedClient.WriteLine(GlassProtocol.RequestFileText);
+                            selectedClient.WriteLine(remainder);
+                            break;
+                        case "vfscat":
+                            selectedClient.WriteLine(GlassProtocol.RequestVFSFileText);
                             selectedClient.WriteLine(remainder);
                             break;
                         case "cp":

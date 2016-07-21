@@ -46,6 +46,9 @@ namespace GlassClient
         RequestDllLoad =            0x29,
         RequestLocalDllLoad =       0x2A,
         RequestVFSDllLoad =         0x2B,
-        RequestVFSFileSave =        0x2C
+        RequestVFSFileSave =        0x2C,
+        RequestVFSFileMove =        0x2D,
+        RequestVFSFile =            0x2E,
+        RequestVFSFileText =        0x2F
     }
 }
